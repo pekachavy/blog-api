@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Blog API Interface</title>
+
+<style>
+body{
+font-family: Arial;
+background:#f2f2f2;
+padding:40px;
+}
+
+.container{
+background:white;
+padding:20px;
+border-radius:10px;
+width:600px;
+margin:auto;
+box-shadow:0 0 10px gray;
+}
+
+input,button{
+padding:10px;
+margin:5px;
+}
+
+.article{
+background:#fafafa;
+padding:10px;
+margin:10px;
+border-radius:8px;
+border:1px solid #ddd;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Créer un article</h2>
+
+<input id="titre" placeholder="Titre"><br>
+<input id="auteur" placeholder="Auteur"><br>
+<input id="categorie" placeholder="Categorie"><br>
+<input id="tags" placeholder="Tags"><br>
+
+<button onclick="createArticle()">Créer</button>
+
+<h2>Recherche</h2>
+
+<input id="search" placeholder="mot clé">
+<button onclick="searchArticle()">Rechercher</button>
+
+<h2>Liste des articles</h2>
+
+<button onclick="loadArticles()">Actualiser</button>
+
+<div id="articles"></div>
+
+</div>
+
+<script>
+
+const API="http://localhost:3000/api/articles"
+
+function createArticle(){
+
+fetch(API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+titre:document.getElementById("titre").value,
+contenu:"Interface Web",
+auteur:document.getElementById("auteur").value,
+date:new Date().toLocaleDateString(),
+categorie:document.getElementById("categorie").value,
+tags:document.getElementById("tags").value
+})
+})
+.then(()=>{
+
+alert("Article créé")
+loadArticles()
+
+})
+
+}
+
+function loadArticles(){
+
+fetch(API)
+.then(res=>res.json())
+.then(data=>{
+
+let div=document.getElementById("articles")
+div.innerHTML=""
+
+data.forEach(a=>{
+
+div.innerHTML+=`
+<div class="article">
+<h3>${a.titre}</h3>
+<p>Auteur : ${a.auteur}</p>
+<p>Categorie : ${a.categorie}</p>
+<button onclick="deleteArticle(${a.id})">Supprimer</button>
+</div>
+`
+
+})
+
+})
+
+}
+
+function deleteArticle(id){
+
+fetch(API+"/"+id,{
+method:"DELETE"
+})
+.then(()=>{
+alert("Supprimé")
+loadArticles()
+})
+
+}
+
+function searchArticle(){
+
+let q=document.getElementById("search").value
+
+fetch(API+"/search?query="+q)
+.then(res=>res.json())
+.then(data=>{
+
+let div=document.getElementById("articles")
+div.innerHTML=""
+
+data.forEach(a=>{
+
+div.innerHTML+=`
+<div class="article">
+<h3>${a.titre}</h3>
+<p>Auteur : ${a.auteur}</p>
+</div>
+`
+
+})
+
+})
+
+}
+
+</script>
+
+</body>
+</html>
